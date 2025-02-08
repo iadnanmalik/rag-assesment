@@ -6,7 +6,6 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import documentRoutes from "./routes/documentRoutes";
-import winston from "winston"; // Winston logger for structured logging
 import logger from "./services/loggerService";
 
 const app = express();
@@ -15,8 +14,8 @@ const PORT = process.env.PORT || 8001;
 
 
 // Middleware
-app.use(express.json()); // Parses incoming JSON requests
-app.use(cors()); // Enables Cross-Origin Resource Sharing
+app.use(express.json()); 
+app.use(cors()); 
 app.use(helmet()); // Enhances API security
 app.use(morgan("dev")); // Logs HTTP requests
 
@@ -30,14 +29,11 @@ app.use((req: Request, res: Response) => {
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // Log detailed error with metadata
   logger.error(`Error: ${err.message}, Stack: ${err.stack}`);
   
-  // Handle different error types (if necessary, customize based on your app)
   if (err.name === "ValidationError") {
     res.status(400).json({ error: "Bad Request", details: err.message });
   } else {
-    // Generic 500 error for unhandled cases
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

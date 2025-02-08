@@ -1,39 +1,102 @@
-Thanks for sharing the updated folder structure! Based on the new structure and the updates to your `WebSearchTool` and `AnswerAgent`, I'll generate a README file that accurately reflects your project.  
 
-Here's a structured README for your project:  
+## ⚡ Installation  
+
+1. Clone the repository:  
+   ```sh
+   git clone https://github.com/your-repo/rag-assessment.git
+   cd rag-assessment
+   ```  
+
+2. Install dependencies:  
+   ```sh
+   npm install
+   ```  
+
+3. Set up environment variables:  
+   Create a `.env` file in the project root and define:  
+   ```env
+   PORT = 8000
+   PINECONE_API_KEY =
+   PINECONE_INDEX =
+   PINECONE_HOST =
+   OPENAI_API_KEY =
+   SERPER_API_KEY =
+   SERPER_URL =
+   ```
+
+4. Start the server:  
+   ```sh
+   npm run dev  # For development (using nodemon)
+   ```
 
 ---
 
-### README for RAG-Assessment  
+## API Endpoints  
 
-# RAG-Assessment: Retrieval-Augmented Generation with AI  
-
-**RAG-Assessment** is a **Node.js and TypeScript** application that implements **Retrieval-Augmented Generation (RAG)** using OpenAI embeddings, a vector database for document retrieval, and an AI-driven query resolution system.  
+### **1⃣ Document Ingestion**  
+- **Endpoint:** `POST /api/index-document`  
+- **Description:** Uploads a text document in the `/data` folder to the vector database.   
+- **Response:**  
+  ```json
+  {
+    "message": "Document indexed successfully"
+  }
+  ```
 
 ---
 
-## 🚀 Features  
+### **2⃣ Query Processing**  
+- **Endpoint:** `POST /api/query`  
+- **Description:** Processes a user query by retrieving relevant document chunks or performing a web search.  
+- **Request:**  
+  ```json
+  {
+    "query": "What is retrieval-augmented generation?"
+  }
+  ```
+- **Response:**  
+  ```json
+  {
+    "message": "Retrieval-Augmented Generation (RAG) is an AI technique that..."
+  }
+  ```
+
+---
+
+## Steps   
 
 - **Document Ingestion**:  
-  - Upload plain-text documents to the knowledge base.  
-  - Automatically splits text into smaller, retrievable chunks.  
-  - Uses OpenAI’s `text-embedding-ada-002` model to generate embeddings.  
-  - Stores embeddings and metadata in a **vector database**.  
+  - Add a `.txt` document under the `data` folder. Currently, it holds `knowledge_base.txt` file.
+  - Hit the `POST /api/index-document` endpoint after updating the `.txt` file under the `data` folder.  
+  - The **chunkRawText** function is responsible for chunking the content read from the document and creating chunks with types in accordance with the **TextChunk** interface.
 
 - **Query Processing**:  
-  - Accepts user queries via a REST API.  
-  - Retrieves the most relevant document chunks using similarity search.  
-  - Uses an **AnswerAgent** to determine if the query should be answered from the knowledge base or an external web search.  
-  - Integrates a **Web Search Tool** for fetching external information when necessary.  
-  - Uses OpenAI's API to generate final answers.  
+  - Hit the `POST /api/query` endpoint with the following body:
+   ```json
+  {
+    "query": "What is retrieval-augmented generation?"
+  }
+  ```
+  - The query resolution follows these steps:
+      - The system starts with a **vector search** using a **similarity filter of 0.75** when fetching documents from Pinecone.
+      - If relevant documents are found, they are sent to the **FinalAnswerTool** to generate a response.
+      - If no relevant documents are found, the system calls **OpenAI's Function API** to decide:
+        - Whether to generate a standalone answer using **FinalAnswerTool**.
+        - Or to invoke **WebSearchTool** for external information retrieval.
+      - If **WebSearchTool** is used, the retrieved web search results are passed to **FinalAnswerTool** for final response generation.
+      - If none of these approaches yield a valid response, the AI explicitly states that it **does not have enough knowledge** to answer the query.
 
 - **Logging & Error Handling**:  
-  - Comprehensive logging for debugging and monitoring.  
-  - Error handling middleware for API stability.  
+  - The system maintains logs in `logs/server.log` for monitoring and debugging.  
+  - Logging includes:
+    - When an answer is retrieved from the knowledge base (including metadata about retrieved chunks).
+    - When a standalone response is generated.
+    - When external search is used (including metadata such as URLs, titles, etc.).
+  - Error handling middleware ensures API stability.  
 
 ---
 
-## 🏗 Folder Structure  
+## 🏷 Folder Structure  
 
 ```
 RAG-ASSESSMENT
@@ -71,98 +134,14 @@ RAG-ASSESSMENT
 
 ---
 
-## ⚡ Installation  
-
-1. Clone the repository:  
-   ```sh
-   git clone https://github.com/your-repo/rag-assessment.git
-   cd rag-assessment
-   ```  
-
-2. Install dependencies:  
-   ```sh
-   npm install
-   ```  
-
-3. Set up environment variables:  
-   Create a `.env` file in the project root and define:  
-   ```env
-   PORT=8000
-   OPENAI_API_KEY=your_openai_key
-   SERPER_URL=your_web_search_api_url
-   SERPER_API_KEY=your_serper_api_key
-   ```
-
-4. Start the server:  
-   ```sh
-   npm run dev  # For development (using nodemon)
-   npm start    # For production
-   ```
-
----
-
-## 🔥 API Endpoints  
-
-### **1️⃣ Document Ingestion**  
-- **Endpoint:** `POST /api/documents`  
-- **Description:** Uploads a text document to the vector database.  
-- **Request:**  
-  ```json
-  {
-    "document": "Your text content here..."
-  }
-  ```  
-- **Response:**  
-  ```json
-  {
-    "message": "Document indexed successfully",
-    "documentId": "12345"
-  }
-  ```
-
----
-
-### **2️⃣ Query Processing**  
-- **Endpoint:** `POST /api/query`  
-- **Description:** Processes a user query by retrieving relevant document chunks or performing a web search.  
-- **Request:**  
-  ```json
-  {
-    "query": "What is retrieval-augmented generation?"
-  }
-  ```
-- **Response:**  
-  ```json
-  {
-    "answer": "Retrieval-Augmented Generation (RAG) is an AI technique that..."
-  }
-  ```
-
----
-
 ## 🛠 Technologies Used  
 
 - **Node.js & TypeScript** - Backend framework  
 - **Express.js** - API routing  
 - **OpenAI API** - Embeddings and response generation  
-- **Vector Database (Pinecone/Weaviate)** - Document storage and retrieval  
+- **Vector Database (Pinecone)** - Document storage and retrieval  
 - **Serper API** - Web search integration  
 - **Winston & Morgan** - Logging  
 
 ---
 
-## 📝 TODO  
-
-- [ ] Implement multi-file document ingestion.  
-- [ ] Add user authentication.  
-- [ ] Improve query classification.  
-
----
-
-## 🏆 Contributing  
-
-Feel free to submit issues or pull requests to improve the project! 🚀  
-
----
-
-Would you like me to add more details or adjust anything? 🚀

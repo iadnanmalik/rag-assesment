@@ -9,7 +9,14 @@ const router = Router();
 
 router.post("/index-document", async (req:any, res:any)=> {
     try {
-        const filePath = path.join(process.cwd(), "data", "knowledge_base.txt");
+        const dataDir = path.join(process.cwd(), "data");
+        const files = fs.readdirSync(dataDir);
+        if (files.length === 0) {
+            const errorMessage = "No files found in data directory.";
+            logger.error(errorMessage);
+            return res.status(404).json({ error: errorMessage });
+        }
+        const filePath = path.join(dataDir, files[0]);
 
         if (!fs.existsSync(filePath)) {
             const errorMessage = `File not found: ${filePath}`;
@@ -39,7 +46,7 @@ router.post("/index-document", async (req:any, res:any)=> {
     }
 });
 
-router.post("/query-document",  async (req:any, res:any)=> {
+router.post("/query",  async (req:any, res:any)=> {
     try {
         const { query } = req.body;
         if (!query || typeof query !== "string") {
