@@ -39,7 +39,6 @@ export class AnswerAgent {
         let response: string;
 
         if (formattedChunks.length > 0) {
-            
             response = await finalAnswerTool!.execute(query, formattedChunks);
         } else {
             // Determine whether the query can be answered directly by the model
@@ -54,7 +53,7 @@ export class AnswerAgent {
                 response = await finalAnswerTool!.execute(query, formattedWebSearch);
               }
               else {
-                response = await selectedTool!.execute(toolQuery, '');
+                response = await selectedTool!.execute(query, '');
               }
 
 

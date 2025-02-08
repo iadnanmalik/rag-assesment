@@ -82,16 +82,15 @@ export class OpenAIService {
 
   async generateEmbeddings(chunk: string) {
     try {
-      logger.info(`Generating embeddings for chunk`);
+      logger.info(`Generating embeddings`);
       const embedding = await this.openai.embeddings.create({
         model: this.embeddingModel,
         input: chunk,
         encoding_format: "float",
       });
-      logger.info(`Generated embeddings for chunk`);
       return embedding.data[0].embedding;
     } catch (error) {
-      logger.error(`Error generating embeddings for chunk`, error);
+      logger.error(`Error generating embeddings`, error);
       return this.fallbackEmbeddings();
     }
   }
