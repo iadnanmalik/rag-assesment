@@ -67,6 +67,7 @@
 
 - **Document Ingestion**:  
   - Add a `.txt` document under the `data` folder. Currently, it holds `knowledge_base.txt` file.
+  - `knowledge_base.txt` holds data for the states in the US.
   - Hit the `POST /api/index-document` endpoint after updating the `.txt` file under the `data` folder.  
   - The **chunkRawText** function is responsible for chunking the content read from the document and creating chunks with types in accordance with the **TextChunk** interface.
 
